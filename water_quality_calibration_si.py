@@ -30,7 +30,6 @@ plt.rcParams['mathtext.default'] = 'regular'  #
 plt.rcParams['mathtext.fontset'] = 'stix'  # formula font
 # mpl.rcParams.update(mpl.rcParamsDefault) # default
 
-
 stations = {'Huiwanzhong': (11, 55), 'Luojiaying': (18, 49), 'GYSdong': (26, 40), 'GYSzhong': (19, 36),
             'GYSxi': (14, 34), 'Baiyukou': (16, 30), 'Haikouxi': (14, 19), 'Dianchinan': (21, 12)}
 
@@ -125,3 +124,35 @@ for station in stations.keys():
                 format='pdf')
     plt.show()
 
+
+def calc_rmse(y_sim, y_obs):
+    y_sim_day = y_sim.copy()
+    y_sim_day['TIME'] = y_sim_day['TIME'].astype(int)
+    y_obs = y_obs.dropna()
+    y_sim_ft = y_sim_day.loc[y_sim_day.TIME.isin(y_obs.DAY.tolist())]
+    y_obs_ft = y_obs.loc[y_obs.DAY.isin(y_sim_day.TIME.tolist())]
+    return sqrt(mean_squared_error(y_sim_ft.iloc[:, -1].values, y_obs_ft.iloc[:, -1].values))
+
+
+rmse_dict = {}
+for index in [x for x in indexes if x != 'ELE']:
+    rmse_list = []
+    for station in stations.keys():
+        wq_simu, wq_obs = {}, {}
+        simulate = alldata.loc[
+            (alldata['TIME'] % 1 > 0.45) & (alldata['TIME'] % 1 < 0.55) &
+            (alldata['I'] == stations[station][0]) & (alldata['J'] == stations[station][1]),
+            ['TIME', 'TEM', 'TN', 'TP', 'COD', 'NH4', 'CHLA', 'DO', 'ELE']]
+        observed = observeds.loc[(observeds['I'] == stations[station][0]) &
+                                 (observeds['J'] == stations[station][1])].copy()
+        simulate['DATE'] = pd.date_range('2012-1-1', '2018-12-30')
+        simulate.index = simulate['TIME'].astype(int)
+        observed.index = observed['DAY']
+        wq_simu[station] = simulate
+        wq_obs[station] = observed
+        rmse = calc_rmse(wq_simu[station][['TIME', index]], wq_obs[station][['DAY', index]])
+        rmse_df = pd.DataFrame([rmse], index=[station], columns=[index])
+        rmse_list.append(rmse_df)
+    rmse_concat = pd.concat(rmse_list, axis=0)
+    rmse_dict[index] = rmse_concat
+    print(f'{index}: {rmse_concat.mean().item()} +/- {rmse_concat.std().item()}')
