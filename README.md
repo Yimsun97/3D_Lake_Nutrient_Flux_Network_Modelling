@@ -1,6 +1,6 @@
 # 3D Lake Nutrient Flux Network Modelling
 
-This repository contains the code for the paper "Exploring Nonlinear Responses of Lake Nutrients to Restoration Measures: A Three-Dimensional Flux Network Modelling Approach".
+This repository contains the code for the paper "Exploring Nonlinear Responses of Lake Nutrients and Algal Blooms to Restoration Measures: A Three-Dimensional Flux Network Modelling Approach".
 
 ## EFDC model
 The parameter configurations of the EFDC model can be found in the SI.
@@ -34,7 +34,8 @@ Files to create the figures in the main text:
 
 Files to create the figures in the SI:
 - ```water_quality_calibration_si.py```: Fig. S1-S7;
-- ```water_quality_scenario_maintext_si.py```: Figs. S8, S9, and S10;
+- ```water_quality_calibration_area.py``` Fig. S8;
+- ```water_quality_scenario_maintext_si.py```: Figs. S9 and S10;
 - ```flux_network_si.py```: Figs. S11-S17.
 
 
